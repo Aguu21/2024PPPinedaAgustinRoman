@@ -10,26 +10,48 @@
             display: inline-block;
         }
 
-        .dropdown-content {
-            display: none; /* Ocultar el contenido inicialmente */
+        .dropdown-content-filtro {
+            display: none;
             position: absolute;
             background-color: #f9f9f9;
             min-width: 160px;
+            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+            z-index: 1;
         }
 
-        .dropdown-content a {
+        .dropdown-content-filtro a {
             color: black;
             padding: 12px 16px;
             text-decoration: none;
             display: block;
         }
 
-        .dropdown-content a:hover {
+        .dropdown-content-filtro a:hover {
+            background-color: #f1f1f1;
+        }
+
+        .dropdown-content-agregar {
+            display: none;
+            position: absolute;
+            background-color: #f9f9f9;
+            min-width: 160px;
+            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+            z-index: 1;
+        }
+
+        .dropdown-content-agregar a {
+            color: black;
+            padding: 12px 16px;
+            text-decoration: none;
+            display: block;
+        }
+
+        .dropdown-content-agregar a:hover {
             background-color: #f1f1f1;
         }
 
         .show {
-            display: block; /* Mostrar el contenido cuando se agrega la clase */
+            display: block;
         }
     </style>
 </head>
@@ -39,11 +61,10 @@
     <br>
     <label>Filtar Por:</label>
     <div class="dropdown">
-        <button type="button" onclick="filtroDropdown()">Todos</button>
-        <div id="dropdownFiltro" class="dropdown-content">
-            <a>Opción 1</a>
-            <a>Opción 2</a>
-            <a>Opción 3</a>
+        <button type="button" id="dropdownFiltro" onclick="toggleDropdownFiltro()"></button>
+        <div id="dropdownMenuFiltro" class="dropdown-content-filtro">
+            <a onclick="selectOptionFiltro('Terrestre')">Terrestre</a>
+            <a onclick="selectOptionFiltro('Aereo')">Aereo</a>
         </div>
     </div>
     <div id="checkboxes"></div>
@@ -65,10 +86,10 @@
     <h1>Formulario ABM</h1>
     <label>Tipo:</label>
     <div class="dropdown">
-        <button type="button" onclick="seleccionDropdown()">Aereo</button>
-        <div id="dropdownSeleccion" class="dropdown-content">
-            <a>Aereo</a>
-            <a>Terrestre</a>
+        <button type="button" id="dropdownAgregar" onclick="toggleDropdownAgregar()">Terrestre</button>
+        <div id="dropdownMenuAgregar" class="dropdown-content-agregar">
+            <a onclick="selectOptionAgregar('Terrestre')">Terrestre</a>
+            <a onclick="selectOptionAgregar('Aereo')">Aereo</a>
         </div>
     </div>
     <section id="sectionInputs"></section>
@@ -145,12 +166,44 @@
     ambForm.style.display = "none";
     const tablaBody = document.querySelector("#tabla tbody");
     //Dropdowns
-    function filtroDropdown() {
-        document.getElementById("dropdownFiltro").classList.toggle("show");
+    document.getElementById("dropdownFiltro").textContent = "Terrestre";
+    function toggleDropdownFiltro() {
+        document.getElementById("dropdownMenuFiltro").classList.toggle("show");
     }
 
-    function seleccionDropdown() {
-        document.getElementById("dropdownSeleccion").classList.toggle("show");
+    function selectOptionFiltro(option) {
+        document.getElementById("dropdownFiltro").textContent = option;
+        toggleDropdownFiltro();
+    }
+
+    function toggleDropdownAgregar() {
+        document.getElementById("dropdownMenuAgregar").classList.toggle("show");
+    }
+
+    function selectOptionAgregar(option) {
+        document.getElementById("dropdownAgregar").textContent = option;
+        toggleDropdownAgregar();
+    }
+
+    window.onclick = function(event) {
+    if (!event.target.matches('#dropdownFiltro')) {
+        var dropdowns = document.getElementsByClassName("dropdown-content-filtro");
+        for (var i = 0; i < dropdowns.length; i++) {
+        var openDropdown = dropdowns[i];
+        if (openDropdown.classList.contains('show')) {
+            openDropdown.classList.remove('show');
+        }
+        }
+    }
+    else if(!event.target.matches('#dropdownAgregar')){
+        var dropdowns = document.getElementsByClassName("dropdown-content-agregar");
+        for (var i = 0; i < dropdowns.length; i++) {
+        var openDropdown = dropdowns[i];
+        if (openDropdown.classList.contains('show')) {
+            openDropdown.classList.remove('show');
+        }
+        }
+    }
     }
 
     //Lista
@@ -165,7 +218,7 @@
         { id: 'cantRue', name: 'Cant Rue' }
     ];
 
-    //Crear tabla y checkboxes.
+    //Crear tabla, checkboxes y Amb.
     const headerTitulos = document.getElementById('headerNombres');
     tablaNombres.forEach(col => {
         var checkbox = document.createElement('input');
@@ -189,6 +242,9 @@
 
         var input = document.createElement('input');
         input.type = 'text';
+        if (col.id == "id"){
+            input.readOnly = true;
+        }
         input.name = col.id + '-text';
         var label = document.createElement('label');
         label.appendChild(document.createTextNode(col.name + ': '));
@@ -214,7 +270,7 @@
     function llenarTabla(vehiculos) {
         vehiculos.forEach(row => {
             let tr = document.createElement("tr");
-            tr.addEventListener("dblclick", actualizarFila);
+            tr.addEventListener("dblclick", actualizarVehiculo);
             for(let i = 0; i < tablaNombres.length; i++){
                 let td = document.createElement("td");
                 td.className = tablaNombres[i].id + "-row";
@@ -274,18 +330,6 @@
     llenarTabla(aereos);
     llenarTabla(terrestres);
 
-    //Manejo de tabla
-    function actualizarFila(){
-        ambForm.style.display = '';
-
-        const celdas = event.currentTarget.querySelectorAll("td");
-        const valores = Array.from(celdas).map(celda => celda.textContent);
-        for (var i = 0; i < tablaNombres.length; i++){
-            document.getElementsByName(tablaNombres[i].id + "-text")[0].value = valores[i];
-        }
-        datosForm.style.display = 'none';
-    }
-
     //Movimientos de form
     function cambiarFormulario(event){
         event.preventDefault();
@@ -296,22 +340,58 @@
 
     function cancelar(){
         for (var i = 0; i < tablaNombres.length; i++){
-            document.getElementsByName(tablaNombres[i].id + "-text")[0].value = "";
+            var input = document.getElementsByName(tablaNombres[i].id + "-text")[0];
+            input.value = "";
+            input.parentElement.style.display = '';
         }
         ambForm.style.display = 'none';
         datosForm.style.display = '';
     }
 
+    function actualizarVehiculo(){
+        ambForm.style.display = '';
+
+        const celdas = event.currentTarget.querySelectorAll("td");
+        const valores = Array.from(celdas).map(celda => celda.textContent);
+        console.log(document.getElementsByName("altMax-text")[0].value );
+        dropdownAgregar = document.getElementById("dropdownAgregar");
+        if (valores[4] == "Vacio"){
+            dropdownAgregar.textContent = "Terrestre";
+        }
+        else{
+            dropdownAgregar.textContent = "Aereo";
+        }
+        document.getElementById("dropdownFiltro").textContent = "Terrestre";
+        for (var i = 0; i < tablaNombres.length; i++){
+            var input = document.getElementsByName(tablaNombres[i].id + "-text")[0]
+            input.value = valores[i];
+            if(input.value == "Vacio"){
+                var label = input.parentElement;
+                label.style.display = 'none';
+            }
+            else{
+                var label = input.parentElement;
+                label.style.display = '';
+            }
+        }
+        
+        datosForm.style.display = 'none';
+    }
+
     //Agregar Vehiculo
     function agregarVehiculo(event) {
         event.preventDefault();
-        const modeloInput = document.getElementsByName('modelo-text')[0];
-        const modelo = modeloInput.value;
-        console.log(modelo);      
+        var elementos = [];
+        tablaNombres.forEach(element => {
+            elementos.push(document.getElementsByName(element.id + '-text')[0].value)
+        });
+
         datosForm.style.display = '';
         ambForm.style.display = 'none';
         for (var i = 0; i < tablaNombres.length; i++){
-            document.getElementsByName(tablaNombres[i].id + "-text")[0].value = "";
+            var input = document.getElementsByName(tablaNombres[i].id + "-text")[0];
+            input.value = "";
+            input.parentElement.style.display = '';
         }
     }
     ambForm.addEventListener("submit", agregarVehiculo);
