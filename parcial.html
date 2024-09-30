@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TP</title>
+    <style>
+        .dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        .dropdown-content {
+            display: none; /* Ocultar el contenido inicialmente */
+            position: absolute;
+            background-color: #f9f9f9;
+            min-width: 160px;
+        }
+
+        .dropdown-content a {
+            color: black;
+            padding: 12px 16px;
+            text-decoration: none;
+            display: block;
+        }
+
+        .dropdown-content a:hover {
+            background-color: #f1f1f1;
+        }
+
+        .show {
+            display: block; /* Mostrar el contenido cuando se agrega la clase */
+        }
+    </style>
+</head>
+<body>
+<form id="datos">
+    <label>Formulario Datos</label>
+    <br>
+    <label>Filtar Por:</label>
+    <div class="dropdown">
+        <button type="button" onclick="filtroDropdown()">Todos</button>
+        <div id="dropdownFiltro" class="dropdown-content">
+            <a>Opción 1</a>
+            <a>Opción 2</a>
+            <a>Opción 3</a>
+        </div>
+    </div>
+    <div id="checkboxes"></div>
+    <br>
+    <label>Promedio Velociad Maxima:</label>
+    <input type="text" id="resultadoPromedio" readonly>
+    <button type="button" onclick="calcularPromedio()">Calcular</button>
+    <br>
+    <table id="tabla" border="1">
+        <thead>
+            <tr id="headerNombres"></tr>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
+    <button type="submit" value="agregar">Agregar</button>
+</form>
+<form id="amb">
+    <h1>Formulario ABM</h1>
+    <label>Tipo:</label>
+    <div class="dropdown">
+        <button type="button" onclick="seleccionDropdown()">Aereo</button>
+        <div id="dropdownSeleccion" class="dropdown-content">
+            <a>Aereo</a>
+            <a>Terrestre</a>
+        </div>
+    </div>
+    <section id="sectionInputs"></section>
+    <button type="submit" value="agregar">Aceptar</button>
+    <button type="button" onclick="cancelar()" value="cancelar">Cancelar</button>
+</form>
+</body>
+<script>
+    //Primer y segundo punto
+    class Vehiculo{
+        id = 0;
+        modelo = "Vacio";
+        anoFab = 1885;
+        velMax = 1;
+        constructor(id, modelo, anoFab, velMax){
+            this.id = id;
+            this.modelo = modelo;
+            this.anoFab = anoFab > 1885 ? anoFab : 1885;
+            this.velMax = velMax > 0 ? velMax : 1;
+        }
+        toString(){
+            return `ID: ${this.id}, Modelo: ${this.modelo}, 
+            Año de Fabricacion: ${this.anoFab}, Velocidad Maxima: 
+            ${this.velMax}`;
+        }
+    }
+    class Aereo extends Vehiculo{
+        altMax = 1;
+        autonomia = 1;
+        constructor(id, modelo, anoFab, velMax, altMax, autonomia){
+            super(id, modelo, anoFab, velMax);
+            this.altMax = altMax;
+            this.autonomia = autonomia;
+        }
+        toString(){
+            return `${super.toString()}, Altura Maxima: ${this.altMax},
+             Autonomia: ${this.autonomia}`
+        }
+    }
+    class Terrestre extends Vehiculo{
+        cantPue = 0;
+        cantRue = 1;
+        constructor(id, modelo, anoFab, velMax, cantPue, cantRue){
+            super(id, modelo, anoFab, velMax);
+            this.cantPue = cantPue;
+            this.cantRue = cantRue;
+        }
+        toString(){
+            return `${super.toString()}, Cantidad de Puertas: ${this.cantPue},
+             Cantidad de Ruedas: ${this.cantRue}`
+        }
+    }
+
+    var vehiculos = '[{"id":14, "modelo":"Ferrari F100", "anoFab":1998, "velMax":400, "cantPue":2, "cantRue":4},{"id":51, "modelo":"Dodge Viper", "anoFab":1991, "velMax":266, "cantPue":2, "cantRue":4},{"id":67, "modelo":"Boeing CH-47 Chinook", "anoFab":1962, "velMax":302, "altMax":6, "autonomia":1200},{"id":666, "modelo":"Aprilia RSV 1000 R", "anoFab":2004, "velMax":280, "cantPue":0, "cantRue":2},{"id":872, "modelo":"Boeing 747-400", "anoFab":1989, "velMax":988, "altMax":13, "autonomia":13450},{"id":742, "modelo":"Cessna CH-1 SkyhookR", "anoFab":1953, "velMax":174, "altMax":3, "autonomia":870}]';
+    var vehiculosJson = JSON.parse(vehiculos);
+    var aereos = [];
+    var terrestres = [];
+
+    vehiculosJson.forEach(vehiculo => {
+        if('altMax' in vehiculo && 'autonomia' in vehiculo){
+            aereos.push(new Aereo(vehiculo.id, vehiculo.modelo, 
+            vehiculo.anoFab, vehiculo.velMax, vehiculo.altMax, vehiculo.autonomia));
+        }
+        else if('cantPue' in vehiculo && 'cantRue' in vehiculo){
+            terrestres.push(new Terrestre(vehiculo.id, vehiculo.modelo, 
+            vehiculo.anoFab, vehiculo.velMax, vehiculo.cantPue, vehiculo.cantRue));
+        }
+    });
+
+    console.log(aereos);
+    //El resto
+    const ambForm = document.getElementById("amb");
+    const datosForm = document.getElementById("datos");
+    ambForm.style.display = "none";
+    const tablaBody = document.querySelector("#tabla tbody");
+    //Dropdowns
+    function filtroDropdown() {
+        document.getElementById("dropdownFiltro").classList.toggle("show");
+    }
+
+    function seleccionDropdown() {
+        document.getElementById("dropdownSeleccion").classList.toggle("show");
+    }
+
+    //Lista
+    const tablaNombres = [
+        { id: 'id', name: 'ID' },
+        { id: 'modelo', name: 'Modelo' },
+        { id: 'anoFab', name: 'Año Fab' },
+        { id: 'velMax', name: 'Vel  Max' },
+        { id: 'altMax', name: 'Alt Max' },
+        { id: 'autonomia', name: 'Autonomia' },
+        { id: 'cantPue', name: 'Cant Pue' },
+        { id: 'cantRue', name: 'Cant Rue' }
+    ];
+
+    //Crear tabla y checkboxes.
+    const headerTitulos = document.getElementById('headerNombres');
+    tablaNombres.forEach(col => {
+        var checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.name = col.id;
+        checkbox.checked = true;
+        checkbox.addEventListener('change', columnaVisible);
+        
+        var label = document.createElement('label');
+        label.appendChild(checkbox);
+        label.appendChild(document.createTextNode(col.name));
+        checkboxes.appendChild(label);
+
+        var th = document.createElement('th');
+        th.id = col.id;
+        var button = document.createElement('button');
+        button.textContent = col.name;
+        button.type = "button";
+        th.appendChild(button);
+        headerTitulos.appendChild(th);
+
+        var input = document.createElement('input');
+        input.type = 'text';
+        input.name = col.id + '-text';
+        var label = document.createElement('label');
+        label.appendChild(document.createTextNode(col.name + ': '));
+        label.appendChild(input)
+        label.appendChild(document.createElement('br'));
+        sectionInputs.appendChild(label);
+    });
+
+    //Controlador de visibilidad de columnas.
+    function columnaVisible() {
+        tablaNombres.forEach(col => {
+            const checkbox = document.querySelector(`input[name="${col.id}"]`);
+            const th = document.getElementById(col.id);
+            const tds = document.querySelectorAll(`.${col.id}-row`);
+            th.style.display = checkbox.checked ? '' : 'none';
+            tds.forEach(td => {
+                td.style.display = checkbox.checked ? '' : 'none';
+            });
+        });
+    }
+
+    //Llenar tabla
+    function llenarTabla(vehiculos) {
+        vehiculos.forEach(row => {
+            let tr = document.createElement("tr");
+            tr.addEventListener("dblclick", actualizarFila);
+            for(let i = 0; i < tablaNombres.length; i++){
+                let td = document.createElement("td");
+                td.className = tablaNombres[i].id + "-row";
+
+                switch (i){
+                    case 0:
+                        td.textContent = row.id;
+                        break;
+                    case 1:
+                        td.textContent = row.modelo;
+                        break;
+                    case 2:
+                        td.textContent = row.anoFab;
+                        break;
+                    case 3:
+                        td.textContent = row.velMax;
+                        break;
+                    case 4:
+                        if("altMax" in row){
+                            td.textContent = row.altMax;
+                        }
+                        else{
+                            td.textContent = "Vacio";
+                        }
+                        break;
+                    case 5:
+                        if("autonomia" in row){
+                            td.textContent = row.autonomia;
+                        }
+                        else{
+                            td.textContent = "Vacio";
+                        }
+                        break;
+                    case 6:
+                        if("cantPue" in row){
+                            td.textContent = row.cantPue;
+                        }
+                        else{
+                            td.textContent = "Vacio";
+                        }
+                        break;
+                    case 7:
+                        if("cantRue" in row){
+                            td.textContent = row.cantRue;
+                        }
+                        else{
+                            td.textContent = "Vacio";
+                        }
+                        break;
+                }
+                tr.appendChild(td);
+            }
+            tablaBody.appendChild(tr);
+        });
+    }
+
+    function actualizarFila(){
+        ambForm.style.display = '';
+
+        const celdas = event.currentTarget.querySelectorAll("td");
+        const valores = Array.from(celdas).map(celda => celda.textContent);
+        document.getElementsByName("col-id-text")[0].value = "1";
+
+        for (var i = 0; i < tablaNombres.length; i++){
+            document.getElementsByName(tablaNombres[i].id + "-text")[0].value = valores[i];
+        }
+        datosForm.style.display = 'none';
+    }
+
+    llenarTabla(aereos);
+    llenarTabla(terrestres);
+
+    //Calcular Promedio
+    function calcularPromedio() {
+        const columnaVelocidad = document.querySelectorAll(
+            `.${tablaNombres[3].id}-row`);
+
+        const valoresVelocidad = Array.from(columnaVelocidad).map(
+            td => td.textContent);
+
+        var suma = 0;
+        valoresVelocidad.forEach(vel => {
+            suma = suma + +vel;
+        });
+        document.getElementById('resultadoPromedio').value = suma / 
+        valoresVelocidad.length;
+    }
+
+</script>
+</html>
