@@ -271,21 +271,51 @@
         });
     }
 
+    llenarTabla(aereos);
+    llenarTabla(terrestres);
+
+    //Manejo de tabla
     function actualizarFila(){
         ambForm.style.display = '';
 
         const celdas = event.currentTarget.querySelectorAll("td");
         const valores = Array.from(celdas).map(celda => celda.textContent);
-        document.getElementsByName("col-id-text")[0].value = "1";
-
         for (var i = 0; i < tablaNombres.length; i++){
             document.getElementsByName(tablaNombres[i].id + "-text")[0].value = valores[i];
         }
         datosForm.style.display = 'none';
     }
 
-    llenarTabla(aereos);
-    llenarTabla(terrestres);
+    //Movimientos de form
+    function cambiarFormulario(event){
+        event.preventDefault();
+        ambForm.style.display = '';
+        datosForm.style.display = 'none';
+    }
+    datosForm.addEventListener("submit", cambiarFormulario);
+
+    function cancelar(){
+        for (var i = 0; i < tablaNombres.length; i++){
+            document.getElementsByName(tablaNombres[i].id + "-text")[0].value = "";
+        }
+        ambForm.style.display = 'none';
+        datosForm.style.display = '';
+    }
+
+    //Agregar Vehiculo
+    function agregarVehiculo(event) {
+        event.preventDefault();
+        const modeloInput = document.getElementsByName('modelo-text')[0];
+        const modelo = modeloInput.value;
+        console.log(modelo);      
+        datosForm.style.display = '';
+        ambForm.style.display = 'none';
+        for (var i = 0; i < tablaNombres.length; i++){
+            document.getElementsByName(tablaNombres[i].id + "-text")[0].value = "";
+        }
+    }
+    ambForm.addEventListener("submit", agregarVehiculo);
+
 
     //Calcular Promedio
     function calcularPromedio() {
