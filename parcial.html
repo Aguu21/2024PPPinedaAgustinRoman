@@ -87,13 +87,42 @@
             font-family: Verdana, Geneva, Tahoma, sans-serif;
         }
 
-        
+        #sectionInputs {
+            margin-top: 10px;
+            margin-bottom: 10px;
+        }
+
+        #sectionInputs label {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+        }
+        #sectionInputs input{
+            margin-left: 10px;
+        }
+
+        button{
+            background-color: rgb(154, 154, 154);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 5px 10px;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: rgb(185, 185, 185);
+        }
+        .btnAgregar{
+            margin-top: 10px;
+        }
+
     </style>
 </head>
 <body>
 <form id="datos">
     <label class="titulo">Formulario Datos</label>
     <br>
+    <div>
     <label>Filtar Por:</label>
     <div class="dropdown">
         <button type="button" id="dropdownFiltro" onclick="toggleDropdownFiltro()"></button>
@@ -102,11 +131,14 @@
             <a onclick="selectOptionFiltro('Aereo')">Aereo</a>
         </div>
     </div>
+    </div>
     <div id="checkboxes"></div>
     <br>
-    <label>Promedio Velociad Maxima:</label>
-    <input type="text" id="resultadoPromedio" readonly>
-    <button type="button" onclick="calcularPromedio()">Calcular</button>
+    <div>
+        <label>Promedio Velociad Maxima:</label>
+        <input type="text" id="resultadoPromedio" readonly>
+        <button type="button" onclick="calcularPromedio()">Calcular</button>
+    </div>
     <br>
     <table id="tabla" border="1">
         <thead>
@@ -115,22 +147,26 @@
         <tbody>
         </tbody>
     </table>
-    <button type="submit" value="agregar">Agregar</button>
+    <button type="submit" value="agregar" class="btnAgregar">Agregar</button>
 </form>
 <form id="amb">
     <h1>Formulario ABM</h1>
-    <label>Tipo:</label>
-    <div class="dropdown">
-        <button type="button" id="dropdownAgregar" onclick="toggleDropdownAgregar()">Terrestre</button>
-        <div id="dropdownMenuAgregar" class="dropdown-content-agregar">
-            <a onclick="selectOptionAgregar('Terrestre')">Terrestre</a>
-            <a onclick="selectOptionAgregar('Aereo')">Aereo</a>
+    <div>
+        <label>Tipo:</label>
+        <div class="dropdown">
+            <button type="button" id="dropdownAgregar" onclick="toggleDropdownAgregar()">Terrestre</button>
+            <div id="dropdownMenuAgregar" class="dropdown-content-agregar">
+                <a onclick="selectOptionAgregar('Terrestre')">Terrestre</a>
+                <a onclick="selectOptionAgregar('Aereo')">Aereo</a>
+            </div>
         </div>
     </div>
     <section id="sectionInputs"></section>
-    <button type="submit" value="agregar">Aceptar</button>
-    <button type="button" onclick="cancelar()" value="cancelar">Cancelar</button>
-    <button type="button" onclick="BorrarVehiculo()" value="borrar">Borrar</button>
+    <div>
+        <button type="submit" value="agregar">Aceptar</button>
+        <button type="button" onclick="cancelar()" value="cancelar">Cancelar</button>
+        <button type="button" onclick="BorrarVehiculo()" value="borrar">Borrar</button>
+    </div>
 
 </form>
 </body>
