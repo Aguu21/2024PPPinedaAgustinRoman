@@ -53,11 +53,46 @@
         .show {
             display: block;
         }
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            border: 1px solid #ccc;
+            background-color: aliceblue;
+            padding: 20px;
+            border-radius: 8px;
+        }
+        input{
+            border-radius: 10px;
+        }
+
+        table{
+            background-color: bisque;
+        }
+
+        .titulo{
+            font-size: 50px;
+            font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+        }
+
+        label{
+            font-family: Verdana, Geneva, Tahoma, sans-serif;
+        }
+
+        
     </style>
 </head>
 <body>
 <form id="datos">
-    <label>Formulario Datos</label>
+    <label class="titulo">Formulario Datos</label>
     <br>
     <label>Filtar Por:</label>
     <div class="dropdown">
@@ -95,6 +130,8 @@
     <section id="sectionInputs"></section>
     <button type="submit" value="agregar">Aceptar</button>
     <button type="button" onclick="cancelar()" value="cancelar">Cancelar</button>
+    <button type="button" onclick="BorrarVehiculo()" value="borrar">Borrar</button>
+
 </form>
 </body>
 <script>
@@ -145,8 +182,8 @@
 
     var vehiculos = '[{"id":14, "modelo":"Ferrari F100", "anoFab":1998, "velMax":400, "cantPue":2, "cantRue":4},{"id":51, "modelo":"Dodge Viper", "anoFab":1991, "velMax":266, "cantPue":2, "cantRue":4},{"id":67, "modelo":"Boeing CH-47 Chinook", "anoFab":1962, "velMax":302, "altMax":6, "autonomia":1200},{"id":666, "modelo":"Aprilia RSV 1000 R", "anoFab":2004, "velMax":280, "cantPue":0, "cantRue":2},{"id":872, "modelo":"Boeing 747-400", "anoFab":1989, "velMax":988, "altMax":13, "autonomia":13450},{"id":742, "modelo":"Cessna CH-1 SkyhookR", "anoFab":1953, "velMax":174, "altMax":3, "autonomia":870}]';
     var vehiculosJson = JSON.parse(vehiculos);
-    var aereos = [];
-    var terrestres = [];
+    const aereos = [];
+    const terrestres = [];
 
     vehiculosJson.forEach(vehiculo => {
         if('altMax' in vehiculo && 'autonomia' in vehiculo){
@@ -159,7 +196,6 @@
         }
     });
 
-    console.log(aereos);
     //El resto
     const ambForm = document.getElementById("amb");
     const datosForm = document.getElementById("datos");
@@ -330,6 +366,12 @@
     llenarTabla(aereos);
     llenarTabla(terrestres);
 
+    function reiniciarTabla(){
+        tablaBody.innerHTML = '';
+        llenarTabla(aereos);
+        llenarTabla(terrestres);
+    }
+
     //Movimientos de form
     function cambiarFormulario(event){
         event.preventDefault();
@@ -353,7 +395,6 @@
 
         const celdas = event.currentTarget.querySelectorAll("td");
         const valores = Array.from(celdas).map(celda => celda.textContent);
-        console.log(document.getElementsByName("altMax-text")[0].value );
         dropdownAgregar = document.getElementById("dropdownAgregar");
         if (valores[4] == "Vacio"){
             dropdownAgregar.textContent = "Terrestre";
@@ -385,7 +426,42 @@
         tablaNombres.forEach(element => {
             elementos.push(document.getElementsByName(element.id + '-text')[0].value)
         });
+        if(elementos[0] == ""){
+            const columnaId = document.querySelectorAll(
+            `.${tablaNombres[0].id}-row`);
 
+            const valoresId = Array.from(columnaId).map(
+            td => td.textContent);
+            elementos[0] = Math.max(...valoresId) + 1;
+        }
+        var bool = true;
+        if (elementos[1] != "" && elementos[2] > 1885 && elementos[3] > 0){
+            if (document.getElementById("dropdownAgregar").textContent == "Terrestre"
+            && elementos[6]> -1 && elementos[7] > 0){
+                var terrestre = new Terrestre(elementos[0], elementos[1], elementos[2], elementos[3], elementos[6], elementos[7]);
+                let index = terrestres.findIndex(obj => obj.id == terrestre.id);
+                if (index !== -1) {
+                    terrestres[index] = terrestre;
+                }
+                else{
+                    terrestres.push(terrestre);
+                }
+                }
+            else if (document.getElementById("dropdownAgregar").textContent == "Aereo"
+            && elementos[4] > 0 && elementos[5] > 0){
+                var aereo = new Aereo(elementos[0], elementos[1], elementos[2], elementos[3],elementos[4],elementos[5]);
+                let index = aereos.findIndex(obj => obj.id == aereo.id);
+                if (index !== -1) {
+                    aereos[index] = aereo;
+                }
+                else{
+                    aereos.push(aereo);
+                }
+            }
+        }
+        
+
+        reiniciarTabla();
         datosForm.style.display = '';
         ambForm.style.display = 'none';
         for (var i = 0; i < tablaNombres.length; i++){
@@ -396,6 +472,38 @@
     }
     ambForm.addEventListener("submit", agregarVehiculo);
 
+    //Borrar Vehiculo
+    function BorrarVehiculo(){
+        let id = document.getElementsByName('id-text')[0].value;
+        if (document.getElementById("dropdownAgregar").textContent == "Terrestre"){
+            let index = terrestres.findIndex(obj => obj.id == id);
+            if (index !== -1) {
+                terrestres.splice(index, 1); 
+            }
+            else{
+                console.log("No existe un vehiculo con esa id")
+            }
+        }
+        else if (document.getElementById("dropdownAgregar").textContent == "Aereo"){
+            let index = aereos.findIndex(obj => obj.id == id);
+            if (index !== -1) {
+                aereos.splice(index, 1); 
+            }
+            else{
+                console.log("No existe un vehiculo con esa id")
+            }
+        }
+        
+        tablaNombres[0].id;
+        reiniciarTabla();
+        datosForm.style.display = '';
+        ambForm.style.display = 'none';
+        for (var i = 0; i < tablaNombres.length; i++){
+            var input = document.getElementsByName(tablaNombres[i].id + "-text")[0];
+            input.value = "";
+            input.parentElement.style.display = '';
+        }
+    }
 
     //Calcular Promedio
     function calcularPromedio() {
